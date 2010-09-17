@@ -21,7 +21,9 @@
 #include <fcntl.h>
 #include <errno.h>
 
-#define THE_DEVICE "/sys/class/timed_output/vibrator/enable"
+#define THE_DEVICE "/sys/devices/platform/android-vibrator/enable"
+//TODO: this drives the strength?
+#define AMPLITUDE "/sys/devices/platform/android-vibrator/amp"
 
 static int sendit(int timeout_ms)
 {
@@ -33,6 +35,13 @@ static int sendit(int timeout_ms)
         return qemu_control_command( "vibrator:%d", timeout_ms );
     }
 #endif
+
+    fd = open(AMPLITUDE, O_RDWR);
+    if(fd < 0)
+        return errno;
+    /* This value was discoved from the korean-v10t rom by adding some logging to the kernel */
+    write(fd, "120\n", 4);
+    close(fd);
 
     fd = open(THE_DEVICE, O_RDWR);
     if(fd < 0)
